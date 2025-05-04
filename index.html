@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>Upload a file</h2>
+    <form id="uploadForm">
+      <input type="file" name="file" accept=".pdf,.jpg,.png,.txt" required />
+      <button type="submit">Upload</button>
+    </form>
+
+    <p id="link"></p>
+
+    <hr/>
+
+    <button id="listBtn">List Uploaded Files</button>
+    <ul id="fileList"></ul>
+
+    <script>
+      document.getElementById('uploadForm').onsubmit = async e => {
+        e.preventDefault();
+        const res = await fetch('/upload', {
+          method: 'POST',
+          body: new FormData(e.target)
+        });
+        const { downloadUrl } = await res.json();
+        document.getElementById('link').innerHTML =
+          `<a href="${downloadUrl}" target="_blank">Download your file</a>`;
+      };
+
+      document.getElementById('listBtn').onclick = async () => {
+        const res = await fetch('/files');
+        const files = await res.json();
+        const listEl = document.getElementById('fileList');
+        listEl.innerHTML = '';  // clear old list
+        files.forEach(f => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="${f.url}" target="_blank">${f.key}</a>`;
+          listEl.appendChild(li);
+        });
+      };
+    </script>
+  </body>
+</html>
